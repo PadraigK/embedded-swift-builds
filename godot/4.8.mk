@@ -1,0 +1,1 @@
+EMSCRIPTEN = 6.0.12

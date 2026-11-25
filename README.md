@@ -9,7 +9,7 @@ Builds parts of Embedded Swift that Swift doesn't publish for Godot's platforms,
 ## Inputs
 
 - A Swift release: a checkout of Swift's repo at the release tag, with `llvm-project` beside it.
-- An Emscripten version: the one the Godot release's web templates use (6.0.12 for Godot 4.8).
+- A Godot version. Its file in `godot/` names the Emscripten version its web templates are built with: `godot/4.8.mk` says 6.0.12. A new Godot version gets a file once esg has certified it.
 
 ## Output
 
@@ -19,4 +19,4 @@ Open: where the built folders are kept for `esg pack` to copy from.
 
 ## Steps
 
-`make emsdk EMSCRIPTEN=<version>` installs that Emscripten into `~/emsdk/<version>` on this machine. Each machine has its own install, since the binaries are per platform. Nothing is added to PATH or to a shell profile. Swift's build takes `~/emsdk/<version>/upstream/emscripten` as its Emscripten path.
+`make emsdk GODOT=<version>` installs that Godot's Emscripten into `~/emsdk/<emscripten version>` on this machine. Each machine has its own install, since the binaries are per platform. Nothing is added to PATH or to a shell profile. Swift's build takes `~/emsdk/<emscripten version>/upstream/emscripten` as its Emscripten path.
