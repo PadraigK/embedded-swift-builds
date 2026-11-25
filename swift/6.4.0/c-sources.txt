@@ -1,6 +1,7 @@
 ../CompatibilityOverride/CompatibilityOverride.cpp
 Actor.cpp
 AsyncLet.cpp
+Clock.cpp
 ConcurrencyHooks.cpp
 GlobalExecutor.cpp
 EmbeddedSupport.cpp
