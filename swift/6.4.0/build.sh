@@ -1,7 +1,6 @@
 #!/bin/bash
 # Embedded _Concurrency for wasm32-unknown-none-wasm from Swift 6.4.0's source: the Swift half for bare wasm, the C++
-# half against Emscripten's headers, with the patches in this folder applied to the source. The Makefile runs it with
-# SWIFT_SOURCE, TAG, BIN, EM, BUILD and OUT set.
+# half against Emscripten's headers. The Makefile runs it with SWIFT_SOURCE, TAG, BIN, EM, BUILD and OUT set.
 set -u -o pipefail
 LISTS=$(cd "$(dirname "$0")" && pwd)
 SRC=$BUILD/src
@@ -12,9 +11,6 @@ git -C "$SWIFT_SOURCE" archive "$TAG" \
   stdlib/public/Concurrency stdlib/public/CompatibilityOverride stdlib/public/SwiftShims stdlib/public/runtime \
   stdlib/public/stubs stdlib/public/Threading stdlib/include include/swift utils/gyb.py utils/availability-macros.def \
   | tar -x -C "$SRC" || exit 1
-for p in "$LISTS"/*.patch; do
-  patch -s -p1 -d "$SRC" < "$p" || exit 1
-done
 
 printf '#ifndef SWIFT_RUNTIME_CMAKECONFIG_H\n#define SWIFT_RUNTIME_CMAKECONFIG_H\n#define SWIFT_VERSION_MAJOR "6"\n#define SWIFT_VERSION_MINOR "4"\n#endif\n' \
   > "$BUILD/gen/swift/Runtime/CMakeConfig.h" || exit 1
