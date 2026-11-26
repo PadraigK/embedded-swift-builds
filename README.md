@@ -12,7 +12,7 @@ Most of the code here was written by an LLM.
 
 ## Inputs
 
-- A Godot version. Its file in `godot/` names the Emscripten version its web templates are built with: `godot/4.8.mk` says 6.0.12. A new Godot version gets a file once esg has certified it.
+- A Godot version. Its file in `godot/` names the Emscripten version its web templates are built with: `godot/4.7.mk` says 4.0.20 and `godot/4.8.mk` says 6.0.12. A new Godot version gets a file once esg has certified it.
 - A Swift release. Its folder in `swift/` holds the recipe. The build reads Swift's source from a checkout holding the release's tag, and compiles with the `swiftc` on PATH, which must be that release.
 
 ## Output
