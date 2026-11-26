@@ -1,0 +1,31 @@
+--- a/stdlib/public/Concurrency/Deque/Deque+Storage.swift
++++ b/stdlib/public/Concurrency/Deque/Deque+Storage.swift
+@@ -45,7 +45,7 @@
+     let object = _DequeBuffer<Element>.create(
+       minimumCapacity: minimumCapacity,
+       makingHeaderWith: {
+-        #if os(OpenBSD)
++        #if os(OpenBSD) || $Embedded
+         let capacity = minimumCapacity
+         #else
+         let capacity = $0.capacity
+--- a/stdlib/public/Concurrency/Deque/Deque+UnsafeHandle.swift
++++ b/stdlib/public/Concurrency/Deque/Deque+UnsafeHandle.swift
+@@ -258,7 +258,7 @@
+     let object = _DequeBuffer<Element>.create(
+       minimumCapacity: minimumCapacity,
+       makingHeaderWith: {
+-        #if os(OpenBSD)
++        #if os(OpenBSD) || $Embedded
+         let capacity = minimumCapacity
+         #else
+         let capacity = $0.capacity
+@@ -291,7 +291,7 @@
+     let object = _DequeBuffer<Element>.create(
+       minimumCapacity: minimumCapacity,
+       makingHeaderWith: {
+-        #if os(OpenBSD)
++        #if os(OpenBSD) || $Embedded
+         let capacity = minimumCapacity
+         #else
+         let capacity = $0.capacity

@@ -7,7 +7,7 @@ Most of the code here was written by an LLM.
 ## What it builds
 
 - Embedded `_Concurrency` for Godot's web export, against the Emscripten version a Godot release's web templates are built with.
-  - Swift 6.4.0: for `wasm32-unknown-none-wasm`. The Swift half is built for bare wasm and the C++ half against Emscripten's headers, by the recipe in `swift/6.4.0/`. Swift's own build has no step for this.
+  - Swift 6.4.0: for `wasm32-unknown-none-wasm`. The Swift half is built for bare wasm and the C++ half against Emscripten's headers, by the recipe in `swift/6.4.0/`. Swift's own build has no step for this. The source is Swift's as tagged plus one patch, `swift/6.4.0/Deque-embedded-capacity.patch`: Concurrency's deque, which `AsyncStream` buffers in, uses the capacity it asked for in Embedded, as Swift does on OpenBSD. In Swift 6.4.0, `ManagedBuffer.capacity` asks the allocator for the block's size, and on bare wasm the standard library's shim answers 0, so the capacity comes out negative and the deque reads and writes outside its buffer. Swift 6.5 returns the requested count instead (swiftlang/swift#94297).
   - Swift 6.5: for `wasm32-unknown-emscripten`, with Swift's own build steps. Not here yet.
 
 ## Inputs
