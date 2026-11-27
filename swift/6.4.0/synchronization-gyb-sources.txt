@@ -1,0 +1,2 @@
+Atomics/AtomicIntegers.swift.gyb
+Atomics/AtomicStorage.swift.gyb

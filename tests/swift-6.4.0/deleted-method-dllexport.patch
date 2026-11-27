@@ -1,0 +1,14 @@
+concurrency-deleted-method: COFF writes dllexport after the linkage of a weak_odr function the
+program defines (define weak_odr dllexport swifttailcc ...), where ELF and Mach-O write none.
+
+--- a/test/embedded/concurrency-deleted-method.swift
++++ b/test/embedded/concurrency-deleted-method.swift
+@@ -52,7 +52,7 @@
+ 
+ // CHECK-IR-NOT:  $e4main7MyActorC12thisIsUnusedyyYaF
+ 
+-// CHECK-IR: define weak_odr {{swifttailcc|swiftcc}} void @swift_deletedAsyncMethodError(ptr swiftasync %0)
++// CHECK-IR: define weak_odr {{(dllexport )?}}{{swifttailcc|swiftcc}} void @swift_deletedAsyncMethodError(ptr swiftasync %0)
+ 
+ // CHECK: value: 42
+ 

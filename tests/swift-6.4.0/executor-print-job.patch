@@ -1,0 +1,53 @@
+custom-executor, dependencies-concurrency-custom-executor: the tests' executor prints a job with %p, which
+is 0x and lowercase hex on macOS and Linux and 16 uppercase digits on Windows; the CHECK lines read 0x[0-9a-f]+.
+It prints 0x and PRIxPTR instead, the same text on all three.
+
+--- a/test/embedded/Inputs/executor.c
++++ b/test/embedded/Inputs/executor.c
+@@ -258,7 +258,7 @@
+ /// Enqueue a job on the global executor.
+ SWIFT_CC(swift) void
+ swift_task_enqueueGlobalImpl(SwiftJob *job) {
+-  debug("executor: job %p enqueued\n", job);
++  debug("executor: job 0x%" PRIxPTR " enqueued\n", (uintptr_t)job);
+ 
+   job_heap_push(job);
+ }
+@@ -271,7 +271,7 @@
+   SwiftTime now = swift_time_now(SwiftContinuousClock);
+   uint64_t deadline = now.seconds * 1000000000ull + now.nanoseconds + delay;
+ 
+-  debug("executor: job %p scheduled with delay %llu ns\n", job, delay);
++  debug("executor: job 0x%" PRIxPTR " scheduled with delay %llu ns\n", (uintptr_t)job, delay);
+ 
+   job_schedule(job, SwiftContinuousClock, deadline);
+ }
+@@ -287,8 +287,8 @@
+                                               SwiftJob *job) {
+   uint64_t deadline = sec * 1000000000ull + nsec;
+ 
+-  debug("executor: job %p scheduled with deadline %"PRIu64" on clock %d\n",
+-         job, deadline, clock);
++  debug("executor: job 0x%" PRIxPTR " scheduled with deadline %"PRIu64" on clock %d\n",
++         (uintptr_t)job, deadline, clock);
+ 
+   job_schedule(job, clock, deadline);
+ }
+@@ -332,7 +332,7 @@
+   while (true) {
+     SwiftJob *job = job_getNextJob();
+     assert(job && "We shouldn't run out of jobs here.");
+-    debug("executor: job %p running\n", job);
++    debug("executor: job 0x%" PRIxPTR " running\n", (uintptr_t)job);
+     swift_job_run(job, swift_executor_generic());
+   }
+ }
+@@ -349,7 +349,7 @@
+     SwiftJob *job = job_getNextJob();
+     if (!job)
+       return;
+-    debug("executor: job %p running\n", job);
++    debug("executor: job 0x%" PRIxPTR " running\n", (uintptr_t)job);
+     swift_job_run(job, swift_executor_generic());
+   }
+   debug("executor: condition satisfied or no more jobs\n");

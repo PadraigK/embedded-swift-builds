@@ -1,0 +1,9 @@
+Atomics/Atomic.swift
+Atomics/AtomicBool.swift
+Atomics/AtomicFloats.swift
+Atomics/AtomicLazyReference.swift
+Atomics/AtomicMemoryOrderings.swift
+Atomics/AtomicOptional.swift
+Atomics/AtomicPointers.swift
+Atomics/AtomicRepresentable.swift
+Atomics/WordPair.swift

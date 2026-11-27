@@ -1,0 +1,28 @@
+# Names _Concurrency's C++ half calls that an Embedded Swift program on Windows may not define, one per line; the
+# rest of a line after the name is why. On Linux and macOS the linker drops the code that calls them when nothing
+# reaches it, and reports them only from code that survives. lld-link reports every undefined name in every object it
+# loads, so the archive carries a fallback for each (windows.sh, /alternatename): a function that names the missing
+# one and aborts. A real definition always wins. A link with /OPT:REF keeps a fallback only when live code calls it,
+# which is the case Linux reports; make windows-check fails a link that keeps one.
+#
+# Never defined by Embedded Swift on Windows:
+?getResilientMetadataBounds@swift@@YA?AU?$TargetClassMetadataBounds@UInProcess@swift@@@1@PEBV?$TargetClassDescriptor@UInProcess@swift@@@1@@Z  full runtime (Metadata.cpp); Actor.cpp's resilient-class path
+swift_getObjectType  full runtime; GlobalExecutor.cpp's checkIsolated bridge
+swift_reportError  full runtime; Error.cpp
+swift_getMainExecutor  Swift, only under #if os(WASI) || !$Embedded (ExecutorBridge.swift)
+_task_taskExecutor_getTaskExecutorRef  Swift, @_unavailableInEmbedded (Executor.swift)
+# Swift functions in _Concurrency (Executor.swift, ExecutorBridge.swift), which a program contains only if it uses them:
+_task_serialExecutor_checkIsolated  Executor.swift
+_task_serialExecutor_getExecutorRef  Executor.swift
+_task_serialExecutor_isIsolatingCurrentContext  Executor.swift
+swift_createDefaultExecutors  Executor.swift
+swift_getDefaultExecutor  ExecutorBridge.swift
+# The Embedded runtime (core/EmbeddedRuntime.swift), which the compiler emits into a program as it needs each:
+swift_allocObject  EmbeddedRuntime.swift
+swift_deallocClassInstance  EmbeddedRuntime.swift
+swift_errorRelease  EmbeddedRuntime.swift
+swift_errorRetain  EmbeddedRuntime.swift
+swift_release  EmbeddedRuntime.swift
+swift_retain  EmbeddedRuntime.swift
+swift_slowAlloc  EmbeddedRuntime.swift
+swift_slowDealloc  EmbeddedRuntime.swift

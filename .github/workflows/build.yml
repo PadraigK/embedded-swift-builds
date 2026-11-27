@@ -12,7 +12,7 @@ on:
         description: Swift release, a folder in swift/
         default: "6.4.0"
       release:
-        description: Publish the build as a release named for the pair
+        description: Publish each build as a release named for it (the web pair, and swift<version>-windows)
         type: boolean
         default: false
 
@@ -55,3 +55,65 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$PAIR" "$PAIR.tar.gz" --target "$GITHUB_SHA" --title "$PAIR" --notes-file "out/$PAIR/BUILD.txt"
+
+  # Embedded Swift for x86_64-unknown-windows-msvc (the Swift, Synchronization and _Concurrency modules and
+  # _Concurrency's archive), built and then checked with Swift's own Embedded concurrency tests. Released only when
+  # the tests pass.
+  windows:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: bash
+    env:
+      SWIFT: ${{ inputs.swift || '6.4.0' }}
+    steps:
+      - uses: actions/checkout@v7
+
+      # swift.org's installer, silently. It writes the toolchain's folders into the user's Path and SDKROOT, which
+      # this step reads back, so nothing here assumes where it put them.
+      - name: Swift toolchain
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP "swift-$env:SWIFT-RELEASE-windows10.exe"
+          Invoke-WebRequest -Uri "https://download.swift.org/swift-$env:SWIFT-release/windows10/swift-$env:SWIFT-RELEASE/swift-$env:SWIFT-RELEASE-windows10.exe" -OutFile $installer
+          $process = Start-Process -FilePath $installer -ArgumentList '/quiet', '/norestart' -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "the Swift installer exited with $($process.ExitCode)" }
+          $sdkroot = [Environment]::GetEnvironmentVariable('SDKROOT', 'User')
+          if (-not $sdkroot) { $sdkroot = [Environment]::GetEnvironmentVariable('SDKROOT', 'Machine') }
+          if (-not $sdkroot) { throw "the Swift installer set no SDKROOT" }
+          "SDKROOT=$sdkroot" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          $paths = @([Environment]::GetEnvironmentVariable('Path', 'User'), [Environment]::GetEnvironmentVariable('Path', 'Machine')) -join ';'
+          $swift = $paths -split ';' | Where-Object { $_ -match '\\Swift\\' -and (Test-Path $_) }
+          if (-not $swift) { throw "the Swift installer put no Swift folder on Path" }
+          $swift | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: GNU make
+        run: choco install make --no-progress -y
+
+      - name: Swift source
+        run: git clone --quiet --depth 1 --no-checkout --branch "swift-$SWIFT-RELEASE" https://github.com/swiftlang/swift.git "$RUNNER_TEMP/swift"
+
+      - name: Build
+        run: |
+          swiftc --version
+          make windows SWIFT="$SWIFT" SWIFT_SOURCE="$RUNNER_TEMP/swift"
+
+      - name: Swift's Embedded concurrency tests
+        run: make windows-check SWIFT="$SWIFT" SWIFT_SOURCE="$RUNNER_TEMP/swift"
+
+      - name: Package
+        run: |
+          NAME=$(make -s windows-name SWIFT="$SWIFT")
+          echo "NAME=$NAME" >> "$GITHUB_ENV"
+          tar -czf "$NAME.tar.gz" -C out "$NAME"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ env.NAME }}.tar.gz
+
+      - name: Release
+        if: inputs.release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$NAME" "$NAME.tar.gz" --target "$GITHUB_SHA" --title "$NAME" --notes-file "out/$NAME/BUILD.txt"
