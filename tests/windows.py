@@ -22,6 +22,11 @@ import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
 TRIPLE = "x86_64-unknown-windows-msvc"
+# The bash on PATH (Git's, which runs make), by its full path: Windows looks in System32 before PATH for a bare
+# name, and on a machine with WSL that finds WSL's bash.exe, which without a distro only prints a store link.
+BASH = shutil.which("bash")
+if BASH is None or pathlib.Path(BASH).parent.name.lower() == "system32":
+    sys.exit(f"windows.py: needs Git's bash on PATH (found {BASH})")
 
 # esg's as_written.py list, which is every test that runs a program with Swift's executor or one of its own. Left out:
 # concurrency-leaks counts allocations by defining malloc and free, which a program can't do against the DLL C
@@ -203,7 +208,7 @@ def run(test, work, bin_dir, out, include, scaffold):
         for command in commands(test, work, bin_dir, out, include, scaffold):
             log.write(f"$ {command}\n")
             log.flush()
-            result = subprocess.run(["bash", "-o", "pipefail", "-c", command], stdout=subprocess.PIPE,
+            result = subprocess.run([BASH, "-o", "pipefail", "-c", command], stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT, text=True, timeout=300)
             log.write(result.stdout)
             if result.returncode != 0:
