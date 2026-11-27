@@ -60,7 +60,9 @@ jobs:
   # _Concurrency's archive), built and then checked with Swift's own Embedded concurrency tests. Released only when
   # the tests pass.
   windows:
-    runs-on: windows-2025
+    # windows-2022 for Visual Studio 2022 (MSVC 14.44): windows-2025's Visual Studio 18 (MSVC 14.52) has an STL
+    # that refuses any clang older than 22, and Swift 6.4's is 21. BUILD.txt records the tools a build used.
+    runs-on: windows-2022
     defaults:
       run:
         shell: bash
